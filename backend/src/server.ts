@@ -1,10 +1,18 @@
 import fastify from "fastify";
+import { prisma } from "./lib/prisma";
+import { createTrip } from "./routes/create";
+import { serializerCompiler, validatorCompiler } from "fastify-type-provider-zod";
 
 const app = fastify();
 
 app.get("/hello", () => {
   return "Hello world!";
 });
+
+app.setValidatorCompiler(validatorCompiler);
+app.setSerializerCompiler(serializerCompiler);
+
+app.register(createTrip)
 
 app.listen({ port: 3333 }).then(() => {
   console.log("Server is running on port 3333");
