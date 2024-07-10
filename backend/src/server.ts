@@ -15,6 +15,7 @@ import cors from "@fastify/cors"
 import { getTripDetails } from "./routes/get-trip-details";
 import { getParticipantDetails } from "./routes/get-participant-details";
 import { errorHandler } from "./error-handler";
+import { env } from "./env";
 
 const app = fastify();
 
@@ -45,6 +46,6 @@ app.register(getTripDetails)
 app.register(getParticipantDetails)
 
 
-app.listen({ port: 3333 }).then(() => {
+app.listen({ port: env.PORT }).then(() => {
   console.log("Server is running on port 3333");
 });
