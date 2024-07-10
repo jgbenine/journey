@@ -3,6 +3,7 @@ import { ZodTypeProvider } from "fastify-type-provider-zod";
 import { prisma } from "../lib/prisma";
 import { dayjs } from "../lib/dayjs";
 import { getMailClient } from "../lib/mail";
+import { ClientError } from "../errors/client-error";
 import nodemailer from "nodemailer";
 import z from "zod";
 
@@ -33,7 +34,7 @@ export async function confirmTrip(app: FastifyInstance) {
       });
 
       if (!tripId) {
-        throw new Error("Trip não encontrado");
+        throw new ClientError("Trip não encontrado");
       }
 
       if (trip?.is_confirmed) {

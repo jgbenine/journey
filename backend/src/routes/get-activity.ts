@@ -1,8 +1,9 @@
 import { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import { prisma } from "../lib/prisma";
-import z from "zod";
 import { dayjs } from "../lib/dayjs";
+import { ClientError } from "../errors/client-error";
+import z from "zod";
 
 export async function getActivities(app: FastifyInstance) {
   app.withTypeProvider<ZodTypeProvider>().get("/trips/:tripId/activities",
@@ -28,7 +29,7 @@ export async function getActivities(app: FastifyInstance) {
       });
 
       if (!trip) {
-        throw new Error("Viagem não encontrada");
+        throw new ClientError("Viagem não encontrada");
       }
 
       const diferencaEntreInicioFinalViagem = dayjs(trip.ends_at).diff(

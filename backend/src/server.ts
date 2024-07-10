@@ -14,20 +14,23 @@ import { updateTrip } from "./routes/update-trip";
 import cors from "@fastify/cors"
 import { getTripDetails } from "./routes/get-trip-details";
 import { getParticipantDetails } from "./routes/get-participant-details";
+import { errorHandler } from "./error-handler";
 
 const app = fastify();
 
-//Alterar em prod.
+//Registrando cors, alterar para rotas do front-end em prod.
 app.register(cors, {
   origin: "*",
 })
 
-
-//zod
+//Zod
 app.setValidatorCompiler(validatorCompiler);
 app.setSerializerCompiler(serializerCompiler);
 
-//routes
+//Substituindo erro trativa de erros padrão do fastify
+app.setErrorHandler(errorHandler);
+
+//Registrando rotas
 app.register(createTrip)
 app.register(confirmTrip)
 app.register(confirmParticipant)

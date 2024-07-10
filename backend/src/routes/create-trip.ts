@@ -4,6 +4,7 @@ import { prisma } from "../lib/prisma";
 import { getMailClient } from "../lib/mail";
 import { dayjs } from "../lib/dayjs";
 import nodemailer from "nodemailer";
+import { ClientError } from "../errors/client-error";
 import z from "zod";
 
 export async function createTrip(app: FastifyInstance) {
@@ -32,11 +33,11 @@ export async function createTrip(app: FastifyInstance) {
       } = request.body;
 
       if (dayjs(starts_at).isBefore(new Date())) {
-        throw new Error("Data inicial inválida");
+        throw new ClientError("Data inicial inválida");
       }
 
       if (dayjs(ends_at).isBefore(starts_at)) {
-        throw new Error("Data final inválida");
+        throw new ClientError("Data final inválida");
       }
 
       const trip = await prisma.trip.create({

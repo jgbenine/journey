@@ -3,6 +3,7 @@ import { ZodTypeProvider } from "fastify-type-provider-zod";
 import { prisma } from "../lib/prisma";
 import { dayjs } from "../lib/dayjs";
 import { getMailClient } from "../lib/mail";
+import { ClientError } from "../errors/client-error";
 import nodemailer from "nodemailer";
 import z from "zod";
 
@@ -28,7 +29,7 @@ export async function createInvite(app: FastifyInstance) {
       });
 
       if (!trip) {
-        throw new Error("Viagem não encontrada");
+        throw new ClientError("Viagem não encontrada");
       }
 
       const participant = await prisma.participant.create({
