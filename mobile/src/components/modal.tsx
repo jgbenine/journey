@@ -17,11 +17,11 @@ type Props = ModalProps & {
   onClose?: () => void
 }
 
-export function Modal({title, subtitle = "", onClose, children,...rest}: Props) {
+export function Modal({ title, subtitle = "", onClose, children, ...rest }: Props) {
   return (
     <RNModal transparent animationType="slide" {...rest}>
       <BlurView
-      style={styles.blueView}
+        style={styles.blueView}
         intensity={7}
         tint="dark"
         experimentalBlurMethod="dimezisBlurView"
@@ -34,7 +34,7 @@ export function Modal({title, subtitle = "", onClose, children,...rest}: Props) 
 
                 {onClose && (
                   <TouchableOpacity activeOpacity={0.7} onPress={onClose}>
-                    <X color={colors.zinc[400]} size={20} />
+                    <X color={colors.zinc[200]} size={20} />
                   </TouchableOpacity>
                 )}
               </View>
@@ -54,7 +54,7 @@ export function Modal({title, subtitle = "", onClose, children,...rest}: Props) 
 }
 
 const styles = StyleSheet.create({
-  blueView:{
+  blueView: {
     flex: 1,
   },
   containerView: {
@@ -62,24 +62,25 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
     backgroundColor: "rgba(0, 0, 0, 0.5)"
   },
-  content:{
-    backgroundColor: colors.zinc[900],
+  content: {
+    backgroundColor: colors.zinc[800],
     borderColor: colors.zinc[500],
-    paddingTop: 10,
-    paddingBottom: 10,
+    paddingTop: 20,
+    paddingBottom: 40,
+    paddingHorizontal: 20,
   },
-  introduction:{
+  introduction: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     paddingTop: 10,
   },
-  title:{
+  title: {
     color: "white",
     fontWeight: "normal",
-    fontSize: 32,
+    fontSize: 25,
   },
-  subtitle:{
+  subtitle: {
     color: colors.zinc[400],
     marginHorizontal: 4,
   }
