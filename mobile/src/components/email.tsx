@@ -20,7 +20,7 @@ export function GuestEmail({ email, onRemove }: Props) {
 
 const styles = StyleSheet.create({
   container:{
-    backgroundColor: colors.zinc[800],
+    backgroundColor: colors.zinc[900],
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 8,
@@ -31,6 +31,7 @@ const styles = StyleSheet.create({
 
   email:{
     color: colors.zinc[300],
+    fontSize: 15,
   }
 
 })

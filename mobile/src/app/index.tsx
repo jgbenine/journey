@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { View, Text, StyleSheet, Image, Keyboard, Alert } from "react-native"
-import { MapPin, Calendar as IconCalendar, Settings2, UserRoundPlus, ArrowRight } from "lucide-react-native"
+import { MapPin, Calendar as IconCalendar, Settings2, UserRoundPlus, ArrowRight, AtSign } from "lucide-react-native"
 import { DateData } from "react-native-calendars"
 import { colors } from "@/styles/colors"
 import { Input } from "@/components/Input"
@@ -9,6 +9,8 @@ import { Modal } from "@/components/modal"
 import { Calendar } from "@/components/calendar"
 import { calendarUtils, DatesSelected } from "@/utils/calendarUtils"
 import dayjs from "dayjs"
+import { GuestEmail } from "@/components/email"
+import { validateInput } from "@/utils/validateInput"
 
 
 
@@ -28,12 +30,14 @@ export default function Index() {
   const [showModal, setShowModal] = useState(MODAL.NONE);
   const [selectDates, setSelectDates] = useState({} as DatesSelected)
   const [destination, setDestination] = useState("")
+  const [emailToEnvite, setEmailToEnvite] = useState("")
+  const [emailsToInvite, setEmailsToInvite] = useState<string[]>([])
 
   function handleNextStepForm() {
     if (destination.trim().length === 0 || !selectDates.startsAt || !selectDates.endsAt) {
       return Alert.alert("Detalhes da viagem", "Preencha os dados da viagem para prosseguir.")
     }
-    if(destination.length < 4){
+    if (destination.length < 4) {
       return Alert.alert("Detalhes da viagem", "Deve ter pelo menos 4 caracteres.")
     }
     if (stepForm === StepFormControl.TRIP_DETAILS) {
@@ -48,6 +52,25 @@ export default function Index() {
       selectedDay,
     })
     setSelectDates(dates)
+  }
+
+  function handleRemoveEmail(emailToRemove: string) {
+    setEmailsToInvite((prevState) => prevState.filter((email => email !== emailToRemove)))
+  }
+
+  function handleAddEmail() {
+    if (!validateInput.email(emailToEnvite)) {
+      return Alert.alert("Convidade", "E-mail invalido!")
+    }
+
+    const emailExist = emailsToInvite.find((email) => email === emailToEnvite);
+    if (emailExist) {
+      return Alert.alert("Convidade", "E-mail ja foi adicionado!")
+    }
+
+    //Adicionando todos e-mails
+    setEmailsToInvite((prevState) => [...prevState, emailToEnvite])
+    setEmailToEnvite("");
   }
 
   return (
@@ -89,7 +112,16 @@ export default function Index() {
             <Text style={styles.divisor} />
             <Input>
               <UserRoundPlus size={18} color={colors.zinc[400]} />
-              <Input.Field placeholder="Quem vai viajar junto?" />
+              <Input.Field
+                placeholder="Quem vai viajar junto?"
+                autoCorrect={false}
+                value={emailsToInvite.length > 0 ? `${emailsToInvite.length} Pessoa(s) convidada(s)` : ""}
+                onPress={() => {
+                  Keyboard.dismiss()
+                  setShowModal(MODAL.GUESTS)
+                }}
+                showSoftInputOnFocus={false}
+              />
             </Input>
           </>
         )}
@@ -112,18 +144,53 @@ export default function Index() {
         visible={showModal === MODAL.CALENDAR}
         onClose={() => { setShowModal(MODAL.NONE) }}>
 
-        <View style={styles.modal} >
+        <View style={styles.modalCalendar} >
           <Calendar
             minDate={dayjs().toISOString()}
             onDayPress={handleSelectDate}
             markedDates={selectDates.dates}
-
           />
           <Button onPress={() => { setShowModal(MODAL.NONE) }}>
             <Button.Title>Confirmar</Button.Title>
           </Button>
         </View>
       </Modal>
+
+      <Modal
+        title="Selecionar convidades"
+        subtitle="Envie um e-mail para os convidades confirmarem a participação na viagem"
+        visible={showModal === MODAL.GUESTS}
+        onClose={() => setShowModal(MODAL.NONE)}
+      >
+
+        <View style={styles.email}>
+          {emailsToInvite.length > 0 ? (
+            emailsToInvite.map((email) => (
+              <GuestEmail key={email} email={email} onRemove={() => { handleRemoveEmail(email) }} />
+            ))
+          ) : (
+            <Text style={{ color: colors.zinc[500] }}>Nenhum e-mail adicionado.</Text>
+          )}
+        </View>
+
+        <View>
+          <Input variants="secondary">
+            <AtSign color={colors.zinc[200]} size={20} />
+            <Input.Field
+              placeholder="E-mail do convidado"
+              keyboardType="email-address"
+              onChangeText={(text) => setEmailToEnvite(text.toLowerCase())}
+              value={emailToEnvite}
+              returnKeyType="send"
+              onSubmitEditing={handleAddEmail}
+            />
+          </Input>
+          <Button onPress={handleAddEmail}>
+            <Button.Title >Convidar</Button.Title>
+          </Button>
+        </View>
+      </Modal>
+
     </View>
   )
 }
@@ -137,5 +204,7 @@ const styles = StyleSheet.create({
   termosPrivacidade: { color: colors.zinc[500], textAlign: "center", fontSize: 14, lineHeight: 20 },
   termosHighlight: { color: colors.lime[300] },
   backgroundImage: { position: "absolute" },
-  modal: { marginTop: 20 },
+  modalCalendar: { marginTop: 20 },
+  email: { marginVertical: 12, flexWrap: "wrap", gap: 2, borderBottomColor: colors.zinc[800], paddingHorizontal: 2, alignItems: "flex-start" },
+
 })
