@@ -11,6 +11,9 @@ import { calendarUtils, DatesSelected } from "@/utils/calendarUtils"
 import dayjs from "dayjs"
 import { GuestEmail } from "@/components/email"
 import { validateInput } from "@/utils/validateInput"
+import { tripServer } from "@/server/trip-server"
+import { router } from "expo-router"
+import { tripStorage } from "@/storage/trip"
 
 
 
@@ -26,6 +29,7 @@ enum MODAL {
 }
 
 export default function Index() {
+  const [isCreatingTrip, setIsCreatingTrip] = useState(false)
   const [stepForm, setStepForm] = useState(StepFormControl.TRIP_DETAILS)
   const [showModal, setShowModal] = useState(MODAL.NONE);
   const [selectDates, setSelectDates] = useState({} as DatesSelected)
@@ -34,16 +38,40 @@ export default function Index() {
   const [emailsToInvite, setEmailsToInvite] = useState<string[]>([])
 
   function handleNextStepForm() {
-    if (destination.trim().length === 0 || !selectDates.startsAt || !selectDates.endsAt) {
-      return Alert.alert("Detalhes da viagem", "Preencha os dados da viagem para prosseguir.")
+    function handleNextStepForm() {
+      if (
+        destination.trim().length === 0 ||
+        !selectDates.startsAt ||
+        !selectDates.endsAt
+      ) {
+        return Alert.alert(
+          "Detalhes da viagem",
+          "Preencha todos as informações da viagem para seguir."
+        )
+      }
+  
+      if (destination.length < 4) {
+        return Alert.alert(
+          "Detalhes da viagem",
+          "O destino deve ter pelo menos 4 caracteres."
+        )
+      }
+  
+      if (stepForm === StepFormControl.TRIP_DETAILS) {
+        return setStepForm(StepFormControl.EMAIL_DETAILS)
+      }
+  
+      Alert.alert("Nova viagem", "Confirmar viagem?", [
+        {
+          text: "Não",
+          style: "cancel",
+        },
+        {
+          text: "Sim",
+          onPress: createTrip,
+        },
+      ])
     }
-    if (destination.length < 4) {
-      return Alert.alert("Detalhes da viagem", "Deve ter pelo menos 4 caracteres.")
-    }
-    if (stepForm === StepFormControl.TRIP_DETAILS) {
-      return setStepForm(StepFormControl.EMAIL_DETAILS)
-    }
-  }
 
   function handleSelectDate(selectedDay: DateData) {
     const dates = calendarUtils.orderStartsAtAndEndsAt({
@@ -72,6 +100,44 @@ export default function Index() {
     setEmailsToInvite((prevState) => [...prevState, emailToEnvite])
     setEmailToEnvite("");
   }
+
+
+  async function saveTrip(tripId: string) {
+    try {
+      await tripStorage.save(tripId)
+      router.navigate("/trip/" + tripId)
+    } catch (error) {
+      Alert.alert(
+        "Salvar viagem",
+        "Não foi possível salvar o id da viagem no dispositivo."
+      )
+      console.log(error)
+    }
+  }
+
+  async function createTrip() {
+    try {
+      setIsCreatingTrip(true)
+
+      const newTrip = await tripServer.createTrip({
+        destination,
+        starts_at: dayjs(selectDates.startsAt?.dateString).toString(),
+        ends_at: dayjs(selectDates.endsAt?.dateString).toString(),
+        emails_to_invite: emailsToInvite,
+      })
+
+      Alert.alert("Nova viagem", "Viagem criada com sucesso!", [
+        {
+          text: "OK. Continuar.",
+          onPress: () => saveTrip(newTrip.tripId),
+        },
+      ])
+    } catch (error) {
+      console.log(error)
+      setIsCreatingTrip(false)
+    }
+  }
+
 
   return (
     <View style={styles.container}>
@@ -193,6 +259,7 @@ export default function Index() {
 
     </View>
   )
+}
 }
 
 const styles = StyleSheet.create({
