@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { View, Text, StyleSheet, Image, Keyboard, Alert } from "react-native"
 import { MapPin, Calendar as IconCalendar, Settings2, UserRoundPlus, ArrowRight, AtSign } from "lucide-react-native"
 import { DateData } from "react-native-calendars"
@@ -14,6 +14,7 @@ import { tripServer } from "@/server/trip-server"
 import { router } from "expo-router"
 import { tripStorage } from "@/storage/trip"
 import dayjs from "dayjs"
+import { Loading } from "@/components/Loading"
 
 
 
@@ -30,6 +31,7 @@ enum MODAL {
 
 export default function Index() {
   const [isCreatingTrip, setIsCreatingTrip] = useState(false)
+  const [isGettingTrip, setIsGettingTrip] = useState(true)
   const [stepForm, setStepForm] = useState(StepFormControl.TRIP_DETAILS)
   const [showModal, setShowModal] = useState(MODAL.NONE);
   const [selectDates, setSelectDates] = useState({} as DatesSelected)
@@ -37,36 +39,36 @@ export default function Index() {
   const [emailToEnvite, setEmailToEnvite] = useState("")
   const [emailsToInvite, setEmailsToInvite] = useState<string[]>([])
 
-    function handleNextStepForm() {
-      if ( destination.trim().length === 0 || !selectDates.startsAt || !selectDates.endsAt) {
-        return Alert.alert(
-          "Detalhes da viagem",
-          "Preencha todos as informações da viagem para seguir."
-        )
-      }
-  
-      if (destination.length < 4) {
-        return Alert.alert(
-          "Detalhes da viagem",
-          "O destino deve ter pelo menos 4 caracteres."
-        )
-      }
-  
-      if (stepForm === StepFormControl.TRIP_DETAILS) {
-        return setStepForm(StepFormControl.EMAIL_DETAILS)
-      }
-  
-      Alert.alert("Nova viagem", "Confirmar viagem?", [
-        {
-          text: "Não",
-          style: "cancel",
-        },
-        {
-          text: "Sim",
-          onPress: createTrip,
-        },
-      ])
+  function handleNextStepForm() {
+    if (destination.trim().length === 0 || !selectDates.startsAt || !selectDates.endsAt) {
+      return Alert.alert(
+        "Detalhes da viagem",
+        "Preencha todos as informações da viagem para seguir."
+      )
     }
+
+    if (destination.length < 4) {
+      return Alert.alert(
+        "Detalhes da viagem",
+        "O destino deve ter pelo menos 4 caracteres."
+      )
+    }
+
+    if (stepForm === StepFormControl.TRIP_DETAILS) {
+      return setStepForm(StepFormControl.EMAIL_DETAILS)
+    }
+
+    Alert.alert("Nova viagem", "Confirmar viagem?", [
+      {
+        text: "Não",
+        style: "cancel",
+      },
+      {
+        text: "Sim",
+        onPress: createTrip,
+      },
+    ])
+  }
 
   function handleSelectDate(selectedDay: DateData) {
     const dates = calendarUtils.orderStartsAtAndEndsAt({
@@ -133,6 +135,31 @@ export default function Index() {
     }
   }
 
+  async function getTrip() {
+    try {
+      const tripID = await tripStorage.get()
+      if (!tripID) {
+        return setIsGettingTrip(false);
+      }
+
+      const trip = await tripServer.getTripById(tripID);
+      if (trip) {
+        return router.navigate("/trip/" + trip.id);
+      }
+
+    } catch (error) {
+      setIsGettingTrip(false);
+      console.log(error)
+    }
+  }
+
+  useEffect(() => {
+    getTrip()
+  }, [])
+
+  if (isGettingTrip) {
+    return <Loading />
+  }
 
   return (
     <View style={styles.container}>
