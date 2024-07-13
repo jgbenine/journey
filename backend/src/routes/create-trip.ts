@@ -9,8 +9,7 @@ import nodemailer from "nodemailer";
 import z from "zod";
 
 export async function createTrip(app: FastifyInstance) {
-  app.withTypeProvider<ZodTypeProvider>().post(
-    "/trips",
+  app.withTypeProvider<ZodTypeProvider>().post("/trips",
     {
       schema: {
         body: z.object({
@@ -19,10 +18,12 @@ export async function createTrip(app: FastifyInstance) {
           ends_at: z.coerce.date(),
           owner_name: z.string(),
           owner_email: z.string().email(),
-          emails_to_envite: z.array(z.string().email()),
+          emails_to_invite: z.array(z.string().email()),
         }),
       },
     },
+
+    
     async (request) => {
       const {
         destination,
@@ -30,8 +31,9 @@ export async function createTrip(app: FastifyInstance) {
         starts_at,
         owner_email,
         owner_name,
-        emails_to_envite,
+        emails_to_invite,
       } = request.body;
+      // console.log(request.body);
 
       if (dayjs(starts_at).isBefore(new Date())) {
         throw new ClientError("Data inicial inválida");
@@ -55,7 +57,7 @@ export async function createTrip(app: FastifyInstance) {
                   is_confirmed: true,
                   is_owner: true,
                 },
-                ...emails_to_envite.map((email) => {
+                ...emails_to_invite.map((email) => {
                   return { email };
                 }),
               ],
