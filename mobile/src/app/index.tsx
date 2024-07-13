@@ -8,12 +8,12 @@ import { Button } from "@/components/Button"
 import { Modal } from "@/components/modal"
 import { Calendar } from "@/components/calendar"
 import { calendarUtils, DatesSelected } from "@/utils/calendarUtils"
-import dayjs from "dayjs"
 import { GuestEmail } from "@/components/email"
 import { validateInput } from "@/utils/validateInput"
 import { tripServer } from "@/server/trip-server"
 import { router } from "expo-router"
 import { tripStorage } from "@/storage/trip"
+import dayjs from "dayjs"
 
 
 
@@ -37,13 +37,8 @@ export default function Index() {
   const [emailToEnvite, setEmailToEnvite] = useState("")
   const [emailsToInvite, setEmailsToInvite] = useState<string[]>([])
 
-  function handleNextStepForm() {
     function handleNextStepForm() {
-      if (
-        destination.trim().length === 0 ||
-        !selectDates.startsAt ||
-        !selectDates.endsAt
-      ) {
+      if ( destination.trim().length === 0 || !selectDates.startsAt || !selectDates.endsAt) {
         return Alert.alert(
           "Detalhes da viagem",
           "Preencha todos as informações da viagem para seguir."
@@ -118,8 +113,8 @@ export default function Index() {
   async function createTrip() {
     try {
       setIsCreatingTrip(true)
-
-      const newTrip = await tripServer.createTrip({
+      console.log('init create trip')
+      const newTrip = await tripServer.create({
         destination,
         starts_at: dayjs(selectDates.startsAt?.dateString).toString(),
         ends_at: dayjs(selectDates.endsAt?.dateString).toString(),
@@ -192,7 +187,7 @@ export default function Index() {
           </>
         )}
 
-        <Button onPress={handleNextStepForm}>
+        <Button onPress={handleNextStepForm} isLoading={isCreatingTrip}>
           <Button.Title>
             {stepForm === StepFormControl.TRIP_DETAILS ? "Continuar" : "Confirmar Viagem"}
           </Button.Title>
@@ -252,14 +247,13 @@ export default function Index() {
             />
           </Input>
           <Button onPress={handleAddEmail}>
-            <Button.Title >Convidar</Button.Title>
+            <Button.Title>Convidar</Button.Title>
           </Button>
         </View>
       </Modal>
 
     </View>
   )
-}
 }
 
 const styles = StyleSheet.create({
