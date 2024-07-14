@@ -17,15 +17,16 @@ type Props = {
 export function Activity({ data }: Props) {
   return (
     <View style={styles.container}>
-      {data.isBefore ? (
-        <CircleCheck color={colors.lime[300]} size={20} />
-      ) : (
-        <CircleDashed color={colors.zinc[400]} size={20} />
-      )}
-
-      <Text style={styles.title}>
-        {data.title}
-      </Text>
+      <View style={styles.block}>
+        {data.isBefore ? (
+          <CircleCheck color={colors.lime[300]} size={20} />
+        ) : (
+          <CircleDashed color={colors.zinc[400]} size={20} />
+        )}
+        <Text style={styles.title}>
+          {data.title}
+        </Text>
+      </View>
 
       <Text style={styles.hour}>{data.hour}</Text>
     </View>
@@ -33,9 +34,10 @@ export function Activity({ data }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container:{
+  container: {
     width: '100%',
     flexDirection: 'row',
+    justifyContent: 'space-between',
     backgroundColor: colors.zinc[900],
     padding: 16,
     borderRadius: 10,
@@ -43,7 +45,14 @@ const styles = StyleSheet.create({
     gap: 12,
   },
 
-  title:{color: colors.zinc[100], fontSize: 14 },
-  hour:{color: colors.zinc[400], fontSize: 14}
+  block:{
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 4,
+  },
+
+  title: { color: colors.zinc[100], fontSize: 14 },
+  hour: { color: colors.zinc[400], fontSize: 14 }
 
 })

@@ -43,7 +43,7 @@ const Title: React.FC<TextProps> = ({ children }) => {
 
 const styles = StyleSheet.create({
   button: {
-    width: "100%",
+    flex: 1,
     height: 50,
     flexDirection: "row",
     alignItems: "center",

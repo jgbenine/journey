@@ -2,7 +2,7 @@ import { api } from "./api"
 
 type Activity = {
   id: string
-  occurs_at: string
+  occours_at: string
   title: string
 }
 
@@ -17,11 +17,11 @@ type ActivityResponse = {
   }[]
 }
 
-async function create({ tripId, occurs_at, title }: ActivityCreate) {
+async function create({ tripId, occours_at, title }: ActivityCreate) {
   try {
     const { data } = await api.post<{ activityId: string }>(
       `/trips/${tripId}/activities`,
-      { occurs_at, title }
+      {  occours_at, title }
     )
 
     return data
