@@ -8,6 +8,8 @@ import { Input } from "@/components/Input"
 import { validateInput } from "@/utils/validateInput"
 import { linksServer } from "@/server/links-server"
 import { TripLink, TripLinkProps } from "@/components/tripLink"
+import { participantsServer } from "@/server/participants-server"
+import { Participant, ParticipantProps } from "@/components/participant"
 
 export default function Details({ tripId }: { tripId: string }) {
   const [showModal, setShowModal] = useState(false);
@@ -16,6 +18,7 @@ export default function Details({ tripId }: { tripId: string }) {
   const [isCreatingLinkTrip, setIsCreatingLinkTrip] = useState(false)
 
   const [links, setLinks] = useState<TripLinkProps[]>([])
+  const [participants, setParticipants] = useState<ParticipantProps[]>([])
 
 
   function resetNewLinkFields() {
@@ -43,7 +46,8 @@ export default function Details({ tripId }: { tripId: string }) {
       })
 
       Alert.alert("Link", "Link cadastraddo com sucesso!")
-      resetNewLinkFields()
+      resetNewLinkFields();
+      await getTripLinks();
     } catch (error) {
       console.log(error)
     } finally {
@@ -60,8 +64,18 @@ export default function Details({ tripId }: { tripId: string }) {
     }
   }
 
+  async function getTripParticipants() {
+    try {
+      const participants = await participantsServer.getByTripId(tripId)
+      setParticipants(participants)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   useEffect(() => {
     getTripLinks();
+    getTripParticipants();
   }, [])
 
   return (
@@ -88,6 +102,16 @@ export default function Details({ tripId }: { tripId: string }) {
         ) : (
           <Text style={styles.noLinksText}>Nenhum link cadastrado</Text>
         )}
+      </View>
+
+      <View style={styles.guests}>
+        <Text style={styles.titleIntro}>Convidados</Text>
+        <FlatList
+          data={participants}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => <Participant data={item} />}
+          contentContainerStyle={{ gap: 4, marginTop: 10, paddingBottom: 4 }}
+        />
       </View>
 
       <Modal
@@ -152,6 +176,15 @@ const styles = StyleSheet.create({
     marginTop: 20,
     fontSize: 16,
     fontWeight: "500",
+  },
+
+  guests: {
+    flex: 1,
+    borderTopWidth: 2,
+    borderColor: colors.zinc[800],
+    marginTop: 40,
+    paddingTop: 10,
   }
+
 
 })
