@@ -10,6 +10,7 @@ import { Calendar } from "@/components/calendar";
 import { activitiesServer } from "@/server/activities-server";
 import { Activity, ActivityProps } from "@/components/activity";
 import dayjs from "dayjs";
+import { Loading } from "@/components/Loading";
 
 type Props = {
   tripDetails: TripData;
@@ -64,6 +65,8 @@ export default function Activities({ tripDetails }: Props) {
       })
 
       Alert.alert("Cadastrar atividades", "Atividade cadastrada com sucesso!");
+
+      await getTripActivities();
       resetActivityFields()
     } catch (error) {
       console.log(error)
@@ -91,7 +94,7 @@ export default function Activities({ tripDetails }: Props) {
       }))
 
       setTripActivities(activitiesSectionList);
-      console.log(activitiesSectionList);
+      // console.log(activitiesSectionList);
     } catch (error) {
       console.log(error)
     } finally {
@@ -106,40 +109,43 @@ export default function Activities({ tripDetails }: Props) {
 
   return (
     <View style={styles.container}>
-      <View style={styles.content}>
-        <Text style={styles.text}>Atividades:</Text>
+      <View style={styles.contentIntro}>
+        <Text style={styles.titleIntro}>Atividades:</Text>
         <Button onPress={() => setShowModal(MODAL.NEW_ACTIVITY)}>
           <PlusIcon color={colors.lime[950]} size={20} />
           <Button.Title>Nova atividade</Button.Title>
         </Button>
       </View>
 
-      <SectionList
-        sections={tripActivities}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <Activity data={item} />}
-        renderSectionHeader={({ section }) => (
-          <View style={styles.sectionList}>
-            <View style={styles.containerDays}>
-              <Text style={styles.textDayNumber}>
-                Dia {section.title.dayNumber + " "}
-              </Text>
-              <Text style={styles.textDayName}>
-                {section.title.dayName}
-              </Text>
-            </View>
 
-            {
-              section.data.length === 0 && (
-                <Text style={styles.emptyAtivity}>
-                  Nenhuma atividade cadastrada nessa data.
+      {isLoadingActivity ? <Loading /> : (
+        <SectionList
+          sections={tripActivities}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => <Activity data={item} />}
+          showsVerticalScrollIndicator={false}
+          renderSectionHeader={({ section }) => (
+            <View style={styles.sectionList}>
+              <View style={styles.containerDays}>
+                <Text style={styles.textDayNumber}>
+                  Dia {section.title.dayNumber + " "}
                 </Text>
-              )
-            }
+                <Text style={styles.textDayName}>
+                  {section.title.dayName}
+                </Text>
+              </View>
+              {
+                section.data.length === 0 && (
+                  <Text style={styles.emptyAtivity}>
+                    Nenhuma atividade cadastrada nessa data.
+                  </Text>
+                )
+              }
 
-          </View>
-        )}
-      />
+            </View>
+          )}
+        />
+      )}
 
       <Modal
         visible={showModal === MODAL.NEW_ACTIVITY}
@@ -224,14 +230,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
-  content: {
+  contentIntro: {
     width: '100%',
     flexDirection: "row",
     marginTop: 15,
     marginBottom: 20,
   },
 
-  text: {
+  titleIntro: {
     color: "white",
     fontSize: 26,
     fontWeight: "semibold",
@@ -253,8 +259,8 @@ const styles = StyleSheet.create({
     gap: 8,
     width: "100%",
   },
-  
-  containerDays:{
+
+  containerDays: {
     flexDirection: "row",
     alignItems: "center",
   },
@@ -279,5 +285,4 @@ const styles = StyleSheet.create({
     fontWeight: "regular",
     marginBottom: 10,
   }
-
 })

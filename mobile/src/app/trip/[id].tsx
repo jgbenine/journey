@@ -141,6 +141,7 @@ export default function Trip() {
       ) : (
         <Details tripId={tripDetails.id} />
       )}
+ 
 
       <View style={styles.menu}>
         <View style={styles.containerMenu}>
@@ -211,6 +212,7 @@ export default function Trip() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    width: "100%",
     paddingHorizontal: 25,
     paddingTop: 60,
   },
