@@ -3,35 +3,60 @@ import { Button } from "@/components/Button"
 import { Modal } from "@/components/modal"
 import { colors } from "@/styles/colors"
 import { Plus } from "lucide-react-native"
-import { StyleSheet, Text, View } from "react-native"
+import { Alert, StyleSheet, Text, View } from "react-native"
 import { Input } from "@/components/Input"
+import { validateInput } from "@/utils/validateInput"
+import { linksServer } from "@/server/links-server"
 
 export default function Details({ tripId }: { tripId: string }) {
   const [showModal, setShowModal] = useState(false);
-  const [linkName, setLinkName] = useState("");
+  const [linkTitle, setLinkTitle] = useState("");
   const [linkURL, setLinkURL] = useState("");
   const [isCreatingLinkTrip, setIsCreatingLinkTrip] = useState(false)
 
 
-  async function handleCreateLinkTrip(){
+  function resetNewLinkFields() {
+    setLinkTitle("");
+    setLinkURL("");
+    setShowModal(false);
+  }
+
+
+  async function handleCreateLinkTrip() {
     try {
-      
+
+      if (!linkTitle.trim()) {
+        return Alert.alert("Link", "Nome do link é inválido!")
+      }
+      if (!validateInput.url(linkURL.trim())) {
+        return Alert.alert("Link", "Link inválido")
+      }
+
+      setIsCreatingLinkTrip(true)
+      await linksServer.create({
+        tripId,
+        title: linkTitle,
+        url: linkURL
+      })
+
+      Alert.alert("Link", "Link cadastraddo com sucesso!")
+      resetNewLinkFields()
     } catch (error) {
-      console.log(error) 
-    }finally{
+      console.log(error)
+    } finally {
       setIsCreatingLinkTrip(false);
     }
   }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.titleIntro}>Links Importantes</Text>
 
-      <View style={styles.content}>
+      <View style={styles.contentIntro}>
+        <Text style={styles.titleIntro}>Links Importantes</Text>
         <Button variant="secondary" onPress={() => setShowModal(true)}>
           <Plus color={colors.zinc[200]} />
           <Button.Title>
-            Cadastrar novo link
+            Novo link
           </Button.Title>
         </Button>
       </View>
@@ -46,7 +71,7 @@ export default function Details({ tripId }: { tripId: string }) {
           <Input variants="secondary">
             <Input.Field
               placeholder="Titulo do link"
-              onChangeText={setLinkName}
+              onChangeText={setLinkTitle}
             />
           </Input>
           <Input variants="secondary">
@@ -70,30 +95,21 @@ export default function Details({ tripId }: { tripId: string }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-
-  },
-
-  content: {
-    width: '100%',
-    flexDirection: "row",
-    marginTop: 15,
-    marginBottom: 20,
   },
 
   titleIntro: {
     color: "white",
     fontSize: 26,
     fontWeight: "semibold",
-    flex: 1,
-    marginTop: 10,
+  },
+
+  contentIntro: {
+    marginTop: 20,
+    flexDirection: "row",
+    gap: 20,
   },
 
   contentModal: {
-    gap: 8,
     marginBottom: 12,
-  }
-
-
-
-
+  },
 })
