@@ -1,18 +1,21 @@
-import { useState } from "react"
+import { Alert, FlatList, StyleSheet, Text, View } from "react-native"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/Button"
 import { Modal } from "@/components/modal"
 import { colors } from "@/styles/colors"
 import { Plus } from "lucide-react-native"
-import { Alert, StyleSheet, Text, View } from "react-native"
 import { Input } from "@/components/Input"
 import { validateInput } from "@/utils/validateInput"
 import { linksServer } from "@/server/links-server"
+import { TripLink, TripLinkProps } from "@/components/tripLink"
 
 export default function Details({ tripId }: { tripId: string }) {
   const [showModal, setShowModal] = useState(false);
   const [linkTitle, setLinkTitle] = useState("");
   const [linkURL, setLinkURL] = useState("");
   const [isCreatingLinkTrip, setIsCreatingLinkTrip] = useState(false)
+
+  const [links, setLinks] = useState<TripLinkProps[]>([])
 
 
   function resetNewLinkFields() {
@@ -48,6 +51,19 @@ export default function Details({ tripId }: { tripId: string }) {
     }
   }
 
+  async function getTripLinks() {
+    try {
+      const links = await linksServer.getLinksByTripId(tripId)
+      setLinks(links)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  useEffect(() => {
+    getTripLinks();
+  }, [])
+
   return (
     <View style={styles.container}>
 
@@ -59,6 +75,19 @@ export default function Details({ tripId }: { tripId: string }) {
             Novo link
           </Button.Title>
         </Button>
+      </View>
+
+      <View style={styles.linksList}>
+        {links.length > 0 ? (
+          <FlatList
+            data={links}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => <TripLink data={item} />}
+            contentContainerStyle={{ gap: 4 }}
+          />
+        ) : (
+          <Text style={styles.noLinksText}>Nenhum link cadastrado</Text>
+        )}
       </View>
 
       <Modal
@@ -112,4 +141,17 @@ const styles = StyleSheet.create({
   contentModal: {
     marginBottom: 12,
   },
+
+  linksList: {
+    marginTop: 20,
+  },
+
+  noLinksText: {
+    color: colors.zinc[500],
+    textAlign: "center",
+    marginTop: 20,
+    fontSize: 16,
+    fontWeight: "500",
+  }
+
 })

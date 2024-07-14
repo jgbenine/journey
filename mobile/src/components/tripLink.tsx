@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
     width: "100%",
     flexDirection: "row",
     alignItems: "center",
-    gap: 4,
+    gap: 15,
   },
   contentTexts:{
     flex: 1,
