@@ -5,7 +5,7 @@ import { TripDetails, tripServer } from "@/server/trip-server";
 import { colors } from "@/styles/colors";
 import dayjs from "dayjs";
 import { router, useLocalSearchParams } from "expo-router";
-import { Calendar as IconCalendar, CalendarRange, Info, MapPin, Settings2 } from "lucide-react-native";
+import { Calendar as IconCalendar, CalendarRange, Info, MapPin, Settings2, User, Mail } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
 import { Alert, Keyboard, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Activities from "./activities";
@@ -13,6 +13,9 @@ import Details from "./details";
 import { Modal } from "@/components/modal";
 import { Calendar, DateData } from "react-native-calendars";
 import { calendarUtils, DatesSelected } from "@/utils/calendarUtils";
+import { validateInput } from "@/utils/validateInput";
+import { participantsServer } from "@/server/participants-server";
+import { tripStorage } from "@/storage/trip";
 
 
 export type TripData = TripDetails & {
@@ -34,16 +37,22 @@ export default function Trip() {
   const [destination, setDestination] = useState("");
   const [selectDates, setSelectDates] = useState({} as DatesSelected)
   const [isUpdateTrip, setIsUpdateTrip] = useState(false);
-  const tripId = useLocalSearchParams<{ id: string }>().id;
+  const [isLoadingConfirm, setIsLoadingConfirm] = useState(false);
+
+  const [nameParticipant, setNameParticipant] = useState("")
+  const [emailParticipant, setEmailParticipant] = useState("")
+
+
+  const tripParams = useLocalSearchParams<{ id: string, participant?: string }>();
 
   async function getTripDetails() {
     try {
       setIsLoadingTrip(true);
-      if (!tripId) {
+      if (!tripParams.id) {
         return router.back();
       }
 
-      const trip = await tripServer.getTripById(tripId)
+      const trip = await tripServer.getTripById(tripParams.id)
 
       const maxLengthDestination = 14;
       const destinationFormated = trip.destination.length > maxLengthDestination ?
@@ -79,7 +88,7 @@ export default function Trip() {
 
   async function handleUpdateTrip() {
     try {
-      if (!tripId) {
+      if (!tripParams.id) {
         return
       }
 
@@ -90,7 +99,7 @@ export default function Trip() {
       setIsUpdateTrip(true);
 
       await tripServer.udpate({
-        id: tripId,
+        id: tripParams.id,
         destination,
         starts_at: dayjs(selectDates.startsAt.dateString).toString(),
         ends_at: dayjs(selectDates.endsAt.dateString).toString(),
@@ -113,6 +122,37 @@ export default function Trip() {
     }
   }
 
+  async function handleConfirmeTrip() {
+    try {
+      if (!tripParams.participant || !tripParams.id) {
+        return
+      }
+      if (!nameParticipant.trim() || !emailParticipant.trim()) {
+        return Alert.alert("Confirmação", "Preencha nome e e-mail para confirmar viagem!")
+      }
+      if (!validateInput.email(emailParticipant.trim())) {
+        return Alert.alert("Confirmação", "E-mail inválido!")
+      }
+
+      setIsLoadingConfirm(true);
+      await participantsServer.confirmTripByParticipantId({
+        participantId: tripParams.participant,
+        name: nameParticipant.trim(),
+        email: emailParticipant.trim(),
+      })
+
+      Alert.alert("Confirmação", `${nameParticipant}, Sua viagem foi confirmada!`)
+
+      await tripStorage.save(tripDetails.id)
+      setShowModal(MODAL.NONE);
+    } catch (error) {
+      console.log(error);
+      Alert.alert("Confirmação", "Erro ao confirmar viagem!")
+    } finally {
+      setIsLoadingConfirm(false);
+    }
+  }
+
   useEffect(() => {
     getTripDetails();
   }, [])
@@ -120,8 +160,6 @@ export default function Trip() {
   if (isLoadingTrip) {
     return <Loading />
   }
-
-
 
 
 
@@ -141,7 +179,7 @@ export default function Trip() {
       ) : (
         <Details tripId={tripDetails.id} />
       )}
- 
+
 
       <View style={styles.menu}>
         <View style={styles.containerMenu}>
@@ -181,11 +219,7 @@ export default function Trip() {
             <Button.Title>Atualizar</Button.Title>
           </Button>
         </View>
-
       </Modal>
-
-
-
 
       <Modal
         title="Selecionar datas"
@@ -201,6 +235,38 @@ export default function Trip() {
           />
           <Button onPress={() => { setShowModal(MODAL.UPDATE_TRIP) }}>
             <Button.Title>Confirmar</Button.Title>
+          </Button>
+        </View>
+      </Modal>
+
+      <Modal title="Confirmar presença" visible={true}>
+        <View style={styles.modalPresentation}>
+          <Text style={styles.textPresentation}>
+            Você foi convidado(a) para participar dessa viagem, local marcado para
+            viagem é, {" "}
+            <Text style={styles.textHighLigth}>
+              {tripDetails.destination}
+            </Text>
+            {" "} as datas para viagem foi marcadas
+            <Text style={styles.textHighLigth}>
+              {" "}de {dayjs(tripDetails.starts_at).date()}
+              {" "}á {dayjs(tripDetails.ends_at).date()}
+              {" "}de {dayjs(tripDetails.ends_at).format("MMMM")}.
+              {"\n\n"}
+            </Text>
+            Para confirmar presença na viagem, preencha os dados abaixo:
+          </Text>
+
+          <Input variants="secondary">
+            <User size={20} color={colors.zinc[400]} />
+            <Input.Field placeholder="Nome Completo" onChangeText={setNameParticipant} />
+          </Input>
+          <Input variants="secondary">
+            <Mail size={20} color={colors.zinc[400]} />
+            <Input.Field placeholder="E-mail de confirmação" onChangeText={setEmailParticipant} />
+          </Input>
+          <Button isLoading={isLoadingConfirm} onPress={handleConfirmeTrip}>
+            <Button.Title>Confirmar presença</Button.Title>
           </Button>
         </View>
       </Modal>
@@ -250,6 +316,22 @@ const styles = StyleSheet.create({
     gap: 2,
     marginVertical: 12,
   },
-
   modalCalendar: { marginTop: 20 },
+
+  modalPresentation: {
+    marginTop: 16,
+    gap: 10,
+  },
+
+  textPresentation: {
+    color: colors.zinc[400],
+    fontSize: 16,
+    fontWeight: "regular",
+    lineHeight: 23,
+  },
+
+  textHighLigth: {
+    fontWeight: "semibold",
+    color: colors.zinc[100]
+  }
 })
