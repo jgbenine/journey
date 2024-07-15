@@ -122,6 +122,7 @@ export default function Activities({ tripDetails }: Props) {
         <SectionList
           sections={tripActivities}
           keyExtractor={(item) => item.id}
+          contentContainerStyle={{paddingBottom: 100}}
           renderItem={({ item }) => <Activity data={item} />}
           showsVerticalScrollIndicator={false}
           renderSectionHeader={({ section }) => (
@@ -153,7 +154,7 @@ export default function Activities({ tripDetails }: Props) {
         subtitle="Todos convidados podem visualizar"
         onClose={() => { setShowModal(MODAL.NONE) }}>
 
-        <View>
+        <View style={styles.modalActivity}>
           <Input variants="secondary">
             <Tag color={colors.zinc[400]} size={20} />
             <Input.Field
@@ -203,8 +204,7 @@ export default function Activities({ tripDetails }: Props) {
         subtitle="Selecionar a data de atividades"
         visible={showModal === MODAL.CALENDAR}
         onClose={() => setShowModal(MODAL.NONE)}>
-
-        <View>
+        <View style={styles.modalCalendar}>
           <Calendar
             onDayPress={(day) => setActivityDate(day.dateString)}
             markedDates={{ [activityDate]: { selected: true } }}
@@ -231,28 +231,38 @@ const styles = StyleSheet.create({
   },
 
   contentIntro: {
-    width: '100%',
     flexDirection: "row",
-    marginTop: 15,
+    marginTop: 20,
     marginBottom: 20,
+    gap: 20,
   },
 
   titleIntro: {
     color: "white",
     fontSize: 26,
     fontWeight: "semibold",
-    flex: 1,
   },
 
   containersInput: {
     display: "flex",
     flexDirection: "row",
-    gap: 5,
+    gap: 15,
+    marginBottom: 10,
   },
 
   blockInput: {
     width: "50%",
     borderColor: "white",
+  },
+
+  modalActivity:{
+    gap: 5,
+    marginBottom: 10,
+  },
+
+  modalCalendar:{
+    marginTop: 15,
+    gap: 10,
   },
 
   sectionList: {

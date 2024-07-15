@@ -82,6 +82,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     color: colors.zinc[400],
-    marginHorizontal: 4,
+    marginTop: 4,
+    marginBottom: 10,
   }
 })

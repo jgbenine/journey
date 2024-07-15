@@ -44,7 +44,8 @@ const Title: React.FC<TextProps> = ({ children }) => {
 const styles = StyleSheet.create({
   button: {
     flex: 1,
-    height: 50,
+    height: 45,
+    maxHeight: 45,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",

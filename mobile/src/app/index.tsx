@@ -250,7 +250,6 @@ export default function Index() {
         visible={showModal === MODAL.GUESTS}
         onClose={() => setShowModal(MODAL.NONE)}
       >
-
         <View style={styles.email}>
           {emailsToInvite.length > 0 ? (
             emailsToInvite.map((email) => (
@@ -261,7 +260,7 @@ export default function Index() {
           )}
         </View>
 
-        <View>
+        <View style={styles.contentModalInvite}>
           <Input variants="secondary">
             <AtSign color={colors.zinc[200]} size={20} />
             <Input.Field
@@ -278,7 +277,6 @@ export default function Index() {
           </Button>
         </View>
       </Modal>
-
     </View>
   )
 }
@@ -287,12 +285,13 @@ const styles = StyleSheet.create({
   container: { flex: 1, justifyContent: "center", alignItems: "center", paddingHorizontal: 20 },
   text: { color: colors.zinc[400], textAlign: "center", fontSize: 20, marginTop: 10, lineHeight: 28 },
   logo: { height: 25 },
-  containerInput: { width: "100%", backgroundColor: colors.zinc[800], paddingBottom: 15, paddingHorizontal: 10, borderRadius: 6, marginVertical: 40 },
+  containerInput: {backgroundColor: colors.zinc[800], paddingBottom: 15, paddingHorizontal: 10, borderRadius: 6, marginVertical: 40, },
   divisor: { padding: 1, marginVertical: 10, width: "100%", height: 1, backgroundColor: colors.zinc[500], opacity: 0.3 },
   termosPrivacidade: { color: colors.zinc[500], textAlign: "center", fontSize: 14, lineHeight: 20 },
   termosHighlight: { color: colors.lime[300] },
   backgroundImage: { position: "absolute" },
-  modalCalendar: { marginTop: 20 },
-  email: { marginVertical: 12, flexWrap: "wrap", gap: 2, borderBottomColor: colors.zinc[800], paddingHorizontal: 2, alignItems: "flex-start" },
+  modalCalendar: { marginTop: 20, gap: 10 },
+  contentModalInvite: {gap: 15,},
+  email: { marginVertical: 10, flexWrap: "wrap", gap: 5, borderBottomColor: colors.zinc[800], paddingHorizontal: 2, alignItems: "flex-start" },
 
 })

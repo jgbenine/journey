@@ -1,21 +1,21 @@
+import { useEffect, useState } from "react";
+import { Alert, Keyboard, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { router, useLocalSearchParams } from "expo-router";
+import { Calendar as IconCalendar, CalendarRange, Info, MapPin, Settings2, User, Mail } from "lucide-react-native";
 import { Button } from "@/components/Button";
 import { Input } from "@/components/Input";
 import { Loading } from "@/components/Loading";
-import { TripDetails, tripServer } from "@/server/trip-server";
-import { colors } from "@/styles/colors";
-import dayjs from "dayjs";
-import { router, useLocalSearchParams } from "expo-router";
-import { Calendar as IconCalendar, CalendarRange, Info, MapPin, Settings2, User, Mail } from "lucide-react-native";
-import React, { useEffect, useState } from "react";
-import { Alert, Keyboard, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import Activities from "./activities";
-import Details from "./details";
 import { Modal } from "@/components/modal";
+import { colors } from "@/styles/colors";
 import { Calendar, DateData } from "react-native-calendars";
-import { calendarUtils, DatesSelected } from "@/utils/calendarUtils";
 import { validateInput } from "@/utils/validateInput";
 import { participantsServer } from "@/server/participants-server";
+import { TripDetails, tripServer } from "@/server/trip-server";
+import { calendarUtils, DatesSelected } from "@/utils/calendarUtils";
 import { tripStorage } from "@/storage/trip";
+import Activities from "./activities";
+import Details from "./details";
+import dayjs from "dayjs";
 
 
 export type TripData = TripDetails & {
@@ -42,7 +42,6 @@ export default function Trip() {
 
   const [nameParticipant, setNameParticipant] = useState("")
   const [emailParticipant, setEmailParticipant] = useState("")
-
 
   const tripParams = useLocalSearchParams<{ id: string, participant?: string }>();
 
@@ -81,7 +80,6 @@ export default function Trip() {
       setIsLoadingTrip(false);
     }
   }
-
 
   function handleSelectDate(selectedDay: DateData) {
     const dates = calendarUtils.orderStartsAtAndEndsAt({
@@ -159,7 +157,7 @@ export default function Trip() {
     }
   }
 
-  async function handleRemoveTrip(){
+  async function handleRemoveTrip() {
     try {
       Alert.alert("Remover", "Deseja remover viagem?", [
         {
@@ -168,7 +166,7 @@ export default function Trip() {
         },
         {
           text: "Sim",
-          onPress: async ()=>{
+          onPress: async () => {
             await tripStorage.remove();
             router.navigate("/");
           },
@@ -230,19 +228,23 @@ export default function Trip() {
         visible={showModal === MODAL.UPDATE_TRIP}
         onClose={() => setShowModal(MODAL.NONE)}
       >
-        <View style={styles.contentModal}>
+        <View style={styles.modalUpdateTrip}>
           <Input variants="secondary">
             <MapPin size={20} color={colors.zinc[400]} />
             <Input.Field placeholder="Para onde?" onChangeText={setDestination} value={destination}></Input.Field>
           </Input>
           <Input variants="secondary">
             <IconCalendar size={20} color={colors.zinc[400]} />
-            <Input.Field placeholder="Quando?" value={selectDates.formatDatesInText} onPressIn={() => setShowModal(MODAL.CALENDAR)} onFocus={() => Keyboard.dismiss()}></Input.Field>
+            <Input.Field placeholder="Quando?"
+              value={selectDates.formatDatesInText}
+              onPressIn={() => setShowModal(MODAL.CALENDAR)}
+              onFocus={() => Keyboard.dismiss()}></Input.Field>
           </Input>
-          <Button onPress={handleUpdateTrip} isLoading={isUpdateTrip}>
-            <Button.Title>Atualizar</Button.Title>
-          </Button>
         </View>
+        <Button onPress={handleUpdateTrip} isLoading={isUpdateTrip}>
+          <Button.Title>Atualizar</Button.Title>
+        </Button>
+
       </Modal>
 
       <Modal
@@ -264,7 +266,7 @@ export default function Trip() {
       </Modal>
 
       {/* visible={showModal === MODAL.CONFIRM_PARTICIPANT} */}
-      <Modal title="Confirmar presença" visible={true} onClose={()=>{}}>
+      <Modal title="Confirmar presença" visible={true}>
         <View style={styles.modalPresentation}>
           <Text style={styles.textPresentation}>
             Você foi convidado(a) para participar dessa viagem, local marcado para
@@ -290,15 +292,18 @@ export default function Trip() {
             <Mail size={20} color={colors.zinc[400]} />
             <Input.Field placeholder="E-mail de confirmação" onChangeText={setEmailParticipant} />
           </Input>
-          <Button isLoading={isLoadingConfirm} onPress={handleConfirmeTrip}>
-            <Button.Title>Confirmar presença</Button.Title>
-          </Button>
 
-          <TouchableOpacity activeOpacity={0.8} onPress={handleRemoveTrip} >
-            <Text style={styles.removeTrip}> 
-              Sair da viagem
-            </Text>
-          </TouchableOpacity>
+          <View style={styles.modalConfirmationActions}>
+            <Button isLoading={isLoadingConfirm} onPress={handleConfirmeTrip}>
+              <Button.Title>Confirmar presença</Button.Title>
+            </Button>
+
+            <TouchableOpacity activeOpacity={0.8} onPress={handleRemoveTrip} >
+              <Text style={styles.removeTrip}>
+                Sair da viagem
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </Modal>
 
@@ -313,6 +318,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 25,
     paddingTop: 60,
   },
+
   buttonEdit: {
     width: 36,
     height: 36,
@@ -334,7 +340,6 @@ const styles = StyleSheet.create({
   },
 
   containerMenu: {
-  //  flex: 1,
     flexDirection: "row",
     backgroundColor: colors.zinc[900],
     borderColor: colors.zinc[800],
@@ -343,15 +348,23 @@ const styles = StyleSheet.create({
     padding: 15,
   },
 
-  contentModal: {
-    gap: 2,
-    marginVertical: 12,
+  modalUpdateTrip: {
+    gap: 5,
+    marginBottom: 15,
   },
-  modalCalendar: { marginTop: 20 },
+
+  modalCalendar: {
+    marginTop: 15,
+    gap: 10,
+  },
 
   modalPresentation: {
     marginTop: 16,
     gap: 10,
+  },
+
+  modalConfirmationActions:{
+    marginTop: 5,
   },
 
   textPresentation: {

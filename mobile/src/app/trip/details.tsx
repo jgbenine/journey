@@ -3,7 +3,7 @@ import { useEffect, useState } from "react"
 import { Button } from "@/components/Button"
 import { Modal } from "@/components/modal"
 import { colors } from "@/styles/colors"
-import { Plus } from "lucide-react-native"
+import { Link, Plus, TextIcon } from "lucide-react-native"
 import { Input } from "@/components/Input"
 import { validateInput } from "@/utils/validateInput"
 import { linksServer } from "@/server/links-server"
@@ -122,14 +122,16 @@ export default function Details({ tripId }: { tripId: string }) {
 
         <View style={styles.contentModal}>
           <Input variants="secondary">
+          <TextIcon size={20} color={colors.zinc[400]} />
             <Input.Field
-              placeholder="Titulo do link"
+              placeholder="Titulo link"
               onChangeText={setLinkTitle}
             />
           </Input>
           <Input variants="secondary">
+            <Link size={20} color={colors.zinc[400]} />
             <Input.Field
-              placeholder="Url do link"
+              placeholder="URL"
               onChangeText={setLinkURL}
             />
           </Input>
@@ -164,6 +166,7 @@ const styles = StyleSheet.create({
 
   contentModal: {
     marginBottom: 12,
+    gap: 5,
   },
 
   linksList: {

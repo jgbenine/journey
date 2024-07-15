@@ -40,15 +40,15 @@ const styles = StyleSheet.create({
   initial: {
     color: colors.zinc[100],
     width: "100%",
-    height: 50,
+    height: 55,
     flexDirection: "row",
     alignItems: "center",
-    gap: 4,
+    gap: 10,
     paddingHorizontal: 10,
-    marginVertical: 10,
+    marginTop: 5,
+    borderRadius: 5,
   },
   primary: {
-    height: 40,
     borderRadius: 6,
     borderColor: colors.zinc[800]
   },
