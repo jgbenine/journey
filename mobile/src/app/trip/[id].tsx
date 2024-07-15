@@ -26,6 +26,7 @@ enum MODAL {
   NONE = 0,
   UPDATE_TRIP = 1,
   CALENDAR = 2,
+  CONFIRM_PARTICIPANT = 3,
 }
 
 export default function Trip() {
@@ -48,6 +49,11 @@ export default function Trip() {
   async function getTripDetails() {
     try {
       setIsLoadingTrip(true);
+
+      if (tripParams.participant) {
+        setShowModal(MODAL.CONFIRM_PARTICIPANT);
+      }
+
       if (!tripParams.id) {
         return router.back();
       }
@@ -153,6 +159,26 @@ export default function Trip() {
     }
   }
 
+  async function handleRemoveTrip(){
+    try {
+      Alert.alert("Remover", "Deseja remover viagem?", [
+        {
+          text: "Não",
+          style: "cancel",
+        },
+        {
+          text: "Sim",
+          onPress: async ()=>{
+            await tripStorage.remove();
+            router.navigate("/");
+          },
+        }
+      ])
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   useEffect(() => {
     getTripDetails();
   }, [])
@@ -160,7 +186,6 @@ export default function Trip() {
   if (isLoadingTrip) {
     return <Loading />
   }
-
 
 
   return (
@@ -185,8 +210,7 @@ export default function Trip() {
         <View style={styles.containerMenu}>
           <Button
             onPress={() => setOption("activity")}
-            variant={option === "activity" ? "primary" : "secondary"}
-          >
+            variant={option === "activity" ? "primary" : "secondary"}>
             <CalendarRange color={option === "activity" ? colors.lime[950] : colors.zinc[200]} size={20} />
             <Button.Title>Atividades</Button.Title>
           </Button>
@@ -239,7 +263,8 @@ export default function Trip() {
         </View>
       </Modal>
 
-      <Modal title="Confirmar presença" visible={true}>
+      {/* visible={showModal === MODAL.CONFIRM_PARTICIPANT} */}
+      <Modal title="Confirmar presença" visible={true} onClose={()=>{}}>
         <View style={styles.modalPresentation}>
           <Text style={styles.textPresentation}>
             Você foi convidado(a) para participar dessa viagem, local marcado para
@@ -268,6 +293,12 @@ export default function Trip() {
           <Button isLoading={isLoadingConfirm} onPress={handleConfirmeTrip}>
             <Button.Title>Confirmar presença</Button.Title>
           </Button>
+
+          <TouchableOpacity activeOpacity={0.8} onPress={handleRemoveTrip} >
+            <Text style={styles.removeTrip}> 
+              Sair da viagem
+            </Text>
+          </TouchableOpacity>
         </View>
       </Modal>
 
@@ -303,7 +334,7 @@ const styles = StyleSheet.create({
   },
 
   containerMenu: {
-    width: "100%",
+  //  flex: 1,
     flexDirection: "row",
     backgroundColor: colors.zinc[900],
     borderColor: colors.zinc[800],
@@ -333,5 +364,11 @@ const styles = StyleSheet.create({
   textHighLigth: {
     fontWeight: "semibold",
     color: colors.zinc[100]
+  },
+
+  removeTrip: {
+    textAlign: "center",
+    color: "#900",
+    marginTop: 10,
   }
 })
