@@ -46,6 +46,10 @@ export async function createInvite(app: FastifyInstance) {
       const mail = await getMailClient();
 
       const confirmationLink = `${env.API_BASE_URL}/participants/${participant.id}/confirm`;
+      // const confirmationLink = new URL(`planner://trip/${trip.id}?participant=${participant.id}`, 
+      //   "http://192.168.0.134:3000"
+      // )
+
       const message = await mail.sendMail({
         from: {
           name: "Equipe Planner",
