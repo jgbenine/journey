@@ -1,4 +1,4 @@
-import { Alert, FlatList, StyleSheet, Text, View } from "react-native"
+import { Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import { useEffect, useState } from "react"
 import { Button } from "@/components/Button"
 import { Modal } from "@/components/modal"
@@ -10,6 +10,7 @@ import { linksServer } from "@/server/links-server"
 import { TripLink, TripLinkProps } from "@/components/tripLink"
 import { participantsServer } from "@/server/participants-server"
 import { Participant, ParticipantProps } from "@/components/participant"
+
 
 export default function Details({ tripId }: { tripId: string }) {
   const [showModal, setShowModal] = useState(false);
@@ -80,7 +81,6 @@ export default function Details({ tripId }: { tripId: string }) {
 
   return (
     <View style={styles.container}>
-
       <View style={styles.contentIntro}>
         <Text style={styles.titleIntro}>Links Importantes</Text>
         <Button variant="secondary" onPress={() => setShowModal(true)}>
@@ -109,8 +109,10 @@ export default function Details({ tripId }: { tripId: string }) {
         <FlatList
           data={participants}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => <Participant data={item} />}
-          contentContainerStyle={{ gap: 4, marginTop: 10, paddingBottom: 4 }}
+          renderItem={({ item }) => (
+            <Participant data={item} />
+          )}
+          contentContainerStyle={{ gap: 10, marginTop: 10, paddingBottom: 4 }}
         />
       </View>
 
@@ -122,7 +124,7 @@ export default function Details({ tripId }: { tripId: string }) {
 
         <View style={styles.contentModal}>
           <Input variants="secondary">
-          <TextIcon size={20} color={colors.zinc[400]} />
+            <TextIcon size={20} color={colors.zinc[400]} />
             <Input.Field
               placeholder="Titulo link"
               onChangeText={setLinkTitle}
@@ -188,6 +190,4 @@ const styles = StyleSheet.create({
     marginTop: 40,
     paddingTop: 10,
   }
-
-
 })

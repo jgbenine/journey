@@ -9,8 +9,8 @@ import { TripData } from "./[id]";
 import { Calendar } from "@/components/calendar";
 import { activitiesServer } from "@/server/activities-server";
 import { Activity, ActivityProps } from "@/components/activity";
-import dayjs from "dayjs";
 import { Loading } from "@/components/Loading";
+import dayjs from "dayjs";
 
 type Props = {
   tripDetails: TripData;
@@ -92,9 +92,7 @@ export default function Activities({ tripDetails }: Props) {
           isBefore: dayjs(activity.occours_at).isBefore(dayjs())
         })),
       }))
-
       setTripActivities(activitiesSectionList);
-      // console.log(activitiesSectionList);
     } catch (error) {
       console.log(error)
     } finally {
@@ -113,7 +111,7 @@ export default function Activities({ tripDetails }: Props) {
         <Text style={styles.titleIntro}>Atividades:</Text>
         <Button onPress={() => setShowModal(MODAL.NEW_ACTIVITY)}>
           <PlusIcon color={colors.lime[950]} size={20} />
-          <Button.Title>Nova atividade</Button.Title>
+          <Button.Title>Cadastrar</Button.Title>
         </Button>
       </View>
 
@@ -122,7 +120,7 @@ export default function Activities({ tripDetails }: Props) {
         <SectionList
           sections={tripActivities}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={{paddingBottom: 100}}
+          contentContainerStyle={{ paddingBottom: 100 }}
           renderItem={({ item }) => <Activity data={item} />}
           showsVerticalScrollIndicator={false}
           renderSectionHeader={({ section }) => (
@@ -142,7 +140,6 @@ export default function Activities({ tripDetails }: Props) {
                   </Text>
                 )
               }
-
             </View>
           )}
         />
@@ -255,12 +252,12 @@ const styles = StyleSheet.create({
     borderColor: "white",
   },
 
-  modalActivity:{
+  modalActivity: {
     gap: 5,
     marginBottom: 10,
   },
 
-  modalCalendar:{
+  modalCalendar: {
     marginTop: 15,
     gap: 10,
   },

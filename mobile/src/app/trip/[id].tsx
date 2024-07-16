@@ -43,15 +43,11 @@ export default function Trip() {
   const [nameParticipant, setNameParticipant] = useState("")
   const [emailParticipant, setEmailParticipant] = useState("")
 
-  const tripParams = useLocalSearchParams<{ id: string, participant?: string }>();
+  const tripParams = useLocalSearchParams<{ id: string}>();
 
   async function getTripDetails() {
     try {
       setIsLoadingTrip(true);
-
-      if (tripParams.participant) {
-        setShowModal(MODAL.CONFIRM_PARTICIPANT);
-      }
 
       if (!tripParams.id) {
         return router.back();
@@ -114,7 +110,7 @@ export default function Trip() {
           text: "OK",
           onPress: () => {
             setShowModal(MODAL.NONE);
-            getTripDetails()
+            getTripDetails();
           }
         },
       ])
@@ -127,9 +123,10 @@ export default function Trip() {
   }
 
   async function handleConfirmeTrip() {
+
     try {
-      if (!tripParams.participant || !tripParams.id) {
-        return
+      if (!tripParams.id) {
+        return Alert.alert("Confirmação", "Participante da viagem invalido!")
       }
       if (!nameParticipant.trim() || !emailParticipant.trim()) {
         return Alert.alert("Confirmação", "Preencha nome e e-mail para confirmar viagem!")
@@ -139,8 +136,15 @@ export default function Trip() {
       }
 
       setIsLoadingConfirm(true);
+
+      const data = await participantsServer.getParticipantByEmail({
+        tripId: tripParams.id,
+        email: emailParticipant.trim(),
+      })
+      const { participants } = data;
+
       await participantsServer.confirmTripByParticipantId({
-        participantId: tripParams.participant,
+        participantId: participants[0].id,
         name: nameParticipant.trim(),
         email: emailParticipant.trim(),
       })
@@ -185,7 +189,6 @@ export default function Trip() {
     return <Loading />
   }
 
-
   return (
     <View style={styles.container}>
       <Input variants="tertiary">
@@ -219,6 +222,14 @@ export default function Trip() {
             <Info color={option === "details" ? colors.lime[950] : colors.zinc[200]} size={20} />
             <Button.Title>Detalhes</Button.Title>
           </Button>
+
+          <Button
+            onPress={() => setShowModal(MODAL.CONFIRM_PARTICIPANT)}
+            variant="secondary"
+          >
+            <User color={colors.zinc[200]} size={20} />
+            <Button.Title>Presenças</Button.Title>
+          </Button>
         </View>
       </View>
 
@@ -244,7 +255,6 @@ export default function Trip() {
         <Button onPress={handleUpdateTrip} isLoading={isUpdateTrip}>
           <Button.Title>Atualizar</Button.Title>
         </Button>
-
       </Modal>
 
       <Modal
@@ -265,8 +275,11 @@ export default function Trip() {
         </View>
       </Modal>
 
-      {/* visible={showModal === MODAL.CONFIRM_PARTICIPANT} */}
-      <Modal title="Confirmar presença" visible={true}>
+
+      <Modal
+        title="Confirmar presença"
+        visible={showModal === MODAL.CONFIRM_PARTICIPANT}
+        onClose={() => setShowModal(MODAL.NONE)}>
         <View style={styles.modalPresentation}>
           <Text style={styles.textPresentation}>
             Você foi convidado(a) para participar dessa viagem, local marcado para
@@ -363,7 +376,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
 
-  modalConfirmationActions:{
+  modalConfirmationActions: {
     marginTop: 5,
   },
 

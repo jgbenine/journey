@@ -16,6 +16,7 @@ import { getTripDetails } from "./routes/get-trip-details";
 import { getParticipantDetails } from "./routes/get-participant-details";
 import { errorHandler } from "./error-handler";
 import { env } from "./env";
+import { getParticipantEmail } from "./routes/get-participant-byEmail";
 
 const app = fastify();
 
@@ -44,6 +45,7 @@ app.register(createInvite)
 app.register(updateTrip)
 app.register(getTripDetails)
 app.register(getParticipantDetails)
+app.register(getParticipantEmail)
 
 
 app.listen({ port: 3333, host: "0.0.0.0" }).then(() => {
